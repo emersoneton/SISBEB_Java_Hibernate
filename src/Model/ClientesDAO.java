@@ -21,7 +21,7 @@ public class ClientesDAO {
 
     }
 
-    public void Salvar(Clientes cli) {
+    public boolean Salvar(Clientes cli, boolean validador) {
 
         try {
 
@@ -34,15 +34,26 @@ public class ClientesDAO {
             
         } catch (Exception e) {
             JOptionPane.showMessageDialog(null, "ERRO AO SALVAR O CLIENTE");
+            validador = false;
         }
+        return validador;
     }
 
-    public void Deletar(Clientes cli) {
+    public boolean Deletar(Clientes cli,boolean validador) {
+        try {
+            
         em.getTransaction().begin(); // iniciar a conexão do banco
-        Query delete = em.createNativeQuery("delete from clientes where nome = '" + cli.getNome() + "'");
+        Query delete = em.createNativeQuery("delete from Clientes where codigo = '"+cli.getCodigo()+"'");
         delete.executeUpdate();
         em.getTransaction().commit();
         emf.close();
+        
+        JOptionPane.showMessageDialog(null, "CLIENTE APAGADO COM SUCESSO!");
+        } catch (Exception e) {
+            JOptionPane.showMessageDialog(null, "ERRO AO DELETAR O CLIENTE");
+            validador = false;
+        }        
+        return validador;
     }
 
     public List<Estados> BuscarEstado(Estados estado) {
@@ -64,6 +75,18 @@ public class ClientesDAO {
 
         return lista;
     }
+    
+    public List<Clientes> BuscarProximoCodigo(){
+        em.getTransaction().begin();
+        
+        Query buscar = em.createQuery("SELECT clientes from Clientes clientes");
+        List<Clientes> lista = buscar.getResultList();
+
+        em.getTransaction().commit();
+        emf.close();
+
+        return lista; 
+    }
 
     public List<Clientes> Buscar(Clientes cli) {
         em.getTransaction().begin(); // iniciar a conexão do banco
@@ -77,11 +100,48 @@ public class ClientesDAO {
         return lista;
     }
 
-    public void Update(Clientes cli) {
+    public boolean Alterar(Clientes cli, boolean validador) {
+        
+        try {
+           
         em.getTransaction().begin(); // iniciar a conexão do banco
-        Query update = em.createNativeQuery("update clientes set nome = '" + cli.getNome() + "' where id = 4");
+        Query update = em.createNativeQuery("update Clientes set nome = :nome, cep = :cep, endereco = :endereco,"
+                + "numero = :numero, cidade = :cidade, estado = :estado, bairro = :bairro, telefone = :telefone,"
+                + "situacao = :situacao where codigo = :codigo");
+        update.setParameter("nome", cli.getNome());
+        update.setParameter("cep", cli.getCep());
+        update.setParameter("endereco", cli.getEndereco());
+        update.setParameter("numero", cli.getNumero());
+        update.setParameter("cidade", cli.getCidade());
+        update.setParameter("estado", cli.getEstado());
+        update.setParameter("bairro", cli.getBairro());
+        update.setParameter("telefone", cli.getTelefone());
+        update.setParameter("situacao", cli.getSituacao());
+        update.setParameter("codigo", cli.getCodigo());
         update.executeUpdate();
         em.getTransaction().commit();
         emf.close();
+        
+        JOptionPane.showMessageDialog(null, "CADASTRO ALTERADO COM SUCESSO!");
+        
+        } catch (Exception e) {
+            JOptionPane.showMessageDialog(null, "ERRO AO ALTERAR OS DADOS DO CLIENTE");
+            validador = false;
+        }
+        return validador;
     }
+    
+    
+    public List<Clientes> BuscarClientes(){
+        em.getTransaction().begin();
+        
+        Query buscar = em.createQuery("SELECT clientes from Clientes clientes Order by nome");
+        List<Clientes> lista = buscar.getResultList();
+
+        em.getTransaction().commit();
+        emf.close();
+
+        return lista; 
+    }
+    
 }
